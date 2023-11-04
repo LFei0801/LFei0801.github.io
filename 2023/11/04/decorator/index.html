@@ -1,0 +1,227 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>装饰器、依赖注入与控制反转 | Alanfliu</title><meta name="author" content="Alan liu"><meta name="copyright" content="Alan liu"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="ffffff"><meta name="description" content="前言最近想学学后端相关的知识，好了解一些后端相关的逻辑， 也更好的掌握业务以及跟后端沟通。 由于在项目中后端是JAVA开发的， 直接学习JAVA成本有点大， 因此选择跟Java Spring Boot 比较接近的NestJS进行学习。 想学习NestJS， 必须掌握装饰器的用法， 以及依赖注入和控制反转（IOC）的思想，本篇文章记录一下我的一些学习心得。 装饰器首先我们需要明确的是，装饰器的本质其">
+<meta property="og:type" content="article">
+<meta property="og:title" content="装饰器、依赖注入与控制反转">
+<meta property="og:url" content="https://lfei0801.github.io/2023/11/04/decorator/index.html">
+<meta property="og:site_name" content="Alanfliu">
+<meta property="og:description" content="前言最近想学学后端相关的知识，好了解一些后端相关的逻辑， 也更好的掌握业务以及跟后端沟通。 由于在项目中后端是JAVA开发的， 直接学习JAVA成本有点大， 因此选择跟Java Spring Boot 比较接近的NestJS进行学习。 想学习NestJS， 必须掌握装饰器的用法， 以及依赖注入和控制反转（IOC）的思想，本篇文章记录一下我的一些学习心得。 装饰器首先我们需要明确的是，装饰器的本质其">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://lfei0801.github.io/assets/avator.jpg">
+<meta property="article:published_time" content="2023-11-04T11:32:53.000Z">
+<meta property="article:modified_time" content="2023-11-04T12:33:23.505Z">
+<meta property="article:author" content="Alan liu">
+<meta property="article:tag" content="Web开发">
+<meta property="article:tag" content="NestJS">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://lfei0801.github.io/assets/avator.jpg"><link rel="shortcut icon" href="/assets/avator.jpg"><link rel="canonical" href="https://lfei0801.github.io/2023/11/04/decorator/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.min.css" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":230},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: true,
+    post: true
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'fancybox',
+  Snackbar: undefined,
+  source: {
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/flickr-justified-gallery/dist/fjGallery.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '装饰器、依赖注入与控制反转',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2023-11-04 20:33:23'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+    win.getCSS = (url,id = false) => new Promise((resolve, reject) => {
+      const link = document.createElement('link')
+      link.rel = 'stylesheet'
+      link.href = url
+      if (id) link.id = id
+      link.onerror = reject
+      link.onload = link.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        link.onload = link.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(link)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', 'ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    
+    const detectApple = () => {
+      if(/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)){
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+    })(window)</script><meta name="generator" content="Hexo 6.3.0"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img is-center"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/assets/avator.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="sidebar-site-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><hr class="custom-hr"/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><span> 技术文章</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/web"><span> web</span></a></li><li><a class="site-page child" href="/mobile"><span> 移动端</span></a></li><li><a class="site-page child" href="/utils"><span> 工具</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/archives"><span> 归档</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background: linear-gradient(20deg, #0062be, #925696, #cc426e, #fb0347)"><nav id="nav"><span id="blog-info"><a href="/" title="Alanfliu"><span class="site-name">Alanfliu</span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><span> 首页</span></a></div><div class="menus_item"><a class="site-page group" href="javascript:void(0);"><span> 技术文章</span><i class="fas fa-chevron-down"></i></a><ul class="menus_item_child"><li><a class="site-page child" href="/web"><span> web</span></a></li><li><a class="site-page child" href="/mobile"><span> 移动端</span></a></li><li><a class="site-page child" href="/utils"><span> 工具</span></a></li></ul></div><div class="menus_item"><a class="site-page" href="/archives"><span> 归档</span></a></div></div><div id="toggle-menu"><a class="site-page" href="javascript:void(0);"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">装饰器、依赖注入与控制反转</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="fa-fw post-meta-icon fas fa-history"></i><span class="post-meta-label">更新于</span><time datetime="2023-11-04T12:33:23.505Z" title="更新于 2023-11-04 20:33:23">2023-11-04</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/NestJS/">NestJS</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title="装饰器、依赖注入与控制反转"><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">阅读量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>最近想学学后端相关的知识，好了解一些后端相关的逻辑， 也更好的掌握业务以及跟后端沟通。 由于在项目中后端是JAVA开发的， 直接学习JAVA成本有点大， 因此选择跟Java Spring Boot 比较接近的NestJS进行学习。</p>
+<p>想学习NestJS， 必须掌握装饰器的用法， 以及依赖注入和控制反转（IOC）的思想，本篇文章记录一下我的一些学习心得。</p>
+<h2 id="装饰器"><a href="#装饰器" class="headerlink" title="装饰器"></a>装饰器</h2><p>首先我们需要明确的是，装饰器的本质其实就是一个函数，只不过它的入参是提前确定好的。同时，TypeScript 中的装饰器目前只能在类以及类成员上使用。</p>
+<p>TypeScript 中的装饰器可以分为类装饰器、方法装饰器、访问符装饰器、属性装饰器以及参数装饰器五种，最常见的主要还是类装饰器、方法装饰器以及属性装饰器</p>
+<p>另外想说的一点就是， 一般不直接使用装饰器本身， 而是使用装饰器工厂函数， 这样可以更好的通过工厂函数的入参来灵活的控制装饰器的内部逻辑</p>
+<blockquote>
+<p><a target="_blank" rel="noopener" href="https://juejin.cn/book/7086408430491172901/section/7107603438330413059#heading-0">装饰器学习链接</a></p>
+</blockquote>
+<h3 id="类装饰器"><a href="#类装饰器" class="headerlink" title="类装饰器"></a>类装饰器</h3><p>类装饰器是直接作用在类上的装饰器，它在执行时的入参只有一个，那就是这个类本身</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@file</span> 类装饰器</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">AddMethod</span>(<span class="params"></span>): <span class="title class_">ClassDecorator</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function">(<span class="params">target: <span class="built_in">Function</span></span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;decorator exec&#x27;</span>)</span><br><span class="line">        target.<span class="property"><span class="keyword">prototype</span></span>.<span class="property">newInstanceMethod</span> = <span class="function">() =&gt;</span> &#123;</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;add a new method&#x27;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="meta">@AddMethod</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">    a = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="title function_">constructor</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">&#x27;constructor exec&#x27;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// decorator exec</span></span><br><span class="line"><span class="comment">// constructor exec</span></span><br><span class="line"><span class="keyword">const</span> a = <span class="keyword">new</span> <span class="title class_">Foo</span>();</span><br><span class="line">(a <span class="keyword">as</span> <span class="built_in">any</span>).<span class="title function_">newInstanceMethod</span>(); <span class="comment">// add a new metho</span></span><br></pre></td></tr></table></figure>
+<p>在上面代码中，通过 TypeScript 内置的 ClassDecorator 类型定义来进行类型标注，由于类装饰器只有一个参数， 而类的本身其实就是一个函数， 因此target的类型是函数类型。我们的函数返回了一个 ClassDecorator ，因此这个装饰器就是一个 Decorator Factory，在实际执行时需要以 @Deco() 的形式调用。</p>
+<p>另外， 装饰器工厂函数先执行， 在执行类的构造函数。<br>通过在target的原型对象上，添加方法， 那么Foo类也拥有了一个新的函数。</p>
+<h3 id="方法装饰器"><a href="#方法装饰器" class="headerlink" title="方法装饰器"></a>方法装饰器</h3><p>方法装饰器的入参包括类的原型、方法名以及方法的属性描述符（PropertyDescriptor），而通过属性描述符你可以控制这个方法的内部实现（即 value）、可变性（即 writable）等信息</p>
+<p>能拿到原本实现，也就意味着，我们可以在执行原本方法的同时，插入一段新的逻辑，比如计算这个方法的执行耗时：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@file</span> 方法装饰器</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> <span class="variable">lf</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ComputeProfiler</span>(<span class="params"></span>): <span class="title class_">MethodDecorator</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function">(<span class="params"></span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="comment">// 类的原型</span></span></span></span><br><span class="line"><span class="params"><span class="function">        target: <span class="built_in">Object</span>,</span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="comment">// 方法名</span></span></span></span><br><span class="line"><span class="params"><span class="function">        methodIdentifier: <span class="built_in">string</span> | <span class="built_in">Symbol</span>, </span></span></span><br><span class="line"><span class="params"><span class="function">        <span class="comment">// 属性描述符</span></span></span></span><br><span class="line"><span class="params"><span class="function">        descriptor: TypedPropertyDescriptor&lt;<span class="built_in">any</span>&gt;</span></span></span><br><span class="line"><span class="params"><span class="function">    </span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// 原方法</span></span><br><span class="line">        <span class="keyword">const</span> originMethodImpl = descriptor.<span class="property">value</span>;</span><br><span class="line">        <span class="comment">// hack 掉原方法</span></span><br><span class="line">        descriptor.<span class="property">value</span> = <span class="keyword">async</span> (...<span class="attr">args</span>: <span class="built_in">unknown</span>[]) =&gt; &#123;</span><br><span class="line">            <span class="keyword">const</span> start = <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">            <span class="keyword">const</span> res = <span class="keyword">await</span> <span class="title function_">originMethodImpl</span>(...args);</span><br><span class="line">            <span class="keyword">const</span> end = <span class="keyword">new</span> <span class="title class_">Date</span>();</span><br><span class="line">            <span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="string">`<span class="subst">$&#123;methodIdentifier&#125;</span> Time is <span class="subst">$&#123;end.getTime() - start.getTime()&#125;</span>`</span> );</span><br><span class="line">            <span class="keyword">return</span> res;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Bar</span> &#123;</span><br><span class="line">    <span class="meta">@ComputeProfiler</span>()</span><br><span class="line">    <span class="keyword">async</span> <span class="title function_">fetch</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="title class_">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="built_in">setTimeout</span>(<span class="function">() =&gt;</span> &#123;</span><br><span class="line">                <span class="title function_">resolve</span>(<span class="string">&#x27;hello&#x27;</span>);</span><br><span class="line">            &#125;, <span class="number">3000</span>);</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> b = <span class="keyword">new</span> <span class="title class_">Bar</span>();</span><br><span class="line">b.<span class="title function_">fetch</span>().<span class="title function_">then</span>(<span class="function"><span class="params">res</span> =&gt;</span> <span class="variable language_">console</span>.<span class="title function_">log</span>(res)); <span class="comment">// fetch Time is 3006</span></span><br></pre></td></tr></table></figure>
+<p>需要注意的是，方法装饰器的 target 是类的原型而非类本身</p>
+<h3 id="属性装饰器"><a href="#属性装饰器" class="headerlink" title="属性装饰器"></a>属性装饰器</h3><p>属性装饰器的入参只有类的原型与属性名称，返回值会被忽略</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Foo</span> &#123;</span><br><span class="line">  <span class="meta">@ModifyNickName</span>()</span><br><span class="line">  nickName!: <span class="built_in">string</span>;</span><br><span class="line">  <span class="title function_">constructor</span>(<span class="params"></span>) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">ModifyNickName</span>(<span class="params"></span>): <span class="title class_">PropertyDecorator</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="function">(<span class="params">target: <span class="built_in">any</span>, propertyIdentifier</span>) =&gt;</span> &#123;</span><br><span class="line">    target[propertyIdentifier] = <span class="string">&#x27;林不渡!&#x27;</span>;</span><br><span class="line">    target[<span class="string">&#x27;otherName&#x27;</span>] = <span class="string">&#x27;别名林不渡!&#x27;</span>;</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="variable language_">console</span>.<span class="title function_">log</span>(<span class="keyword">new</span> <span class="title class_">Foo</span>().<span class="property">nickName</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="参数描述符"><a href="#参数描述符" class="headerlink" title="参数描述符"></a>参数描述符</h3><p>参数装饰器包括了构造函数的参数装饰器与方法的参数装饰器，它的入参包括类的原型、参数所在的方法名与参数在函数参数中的索引值（即第几个参数）</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@file</span> 参数描述符</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> <span class="variable">lf</span></span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">function</span> <span class="title function_">checkParam</span>(<span class="params"></span>): <span class="title class_">ParameterDecorator</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="function">(<span class="params">target: <span class="built_in">Object</span>, method: <span class="built_in">string</span> | <span class="built_in">symbol</span> | <span class="literal">undefined</span>, index: <span class="built_in">number</span></span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(target, method, index);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">FooBar</span> &#123;</span><br><span class="line">    <span class="title function_">handler</span>(<span class="params"><span class="meta">@checkParam</span>() input: <span class="built_in">string</span></span>) &#123;</span><br><span class="line">        <span class="variable language_">console</span>.<span class="title function_">log</span>(input);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// &#123;&#125; handler 0</span></span><br><span class="line"><span class="comment">// input</span></span><br><span class="line"><span class="keyword">new</span> <span class="title class_">FooBar</span>().<span class="title function_">handler</span>(<span class="string">&#x27;input&#x27;</span>);</span><br></pre></td></tr></table></figure>
+
+<h2 id="装饰器执行机制"><a href="#装饰器执行机制" class="headerlink" title="装饰器执行机制"></a>装饰器执行机制</h2><p>在 TypeScript 官方文档中对应用顺序给出了详细的定义：</p>
+<ol>
+<li>参数装饰器，然后依次是方法装饰器，访问符装饰器，或属性装饰器应用到每个实例成员。</li>
+<li>参数装饰器应用到构造函数。</li>
+<li>类装饰器应用到类。</li>
+</ol>
+<h2 id="控制反转与依赖注入"><a href="#控制反转与依赖注入" class="headerlink" title="控制反转与依赖注入"></a>控制反转与依赖注入</h2><p>控制反转( Inversion of Control, IOC)，它是面向对象编程中的一种设计模式，可以用来很好地解耦代码。</p>
+<p>控制反转我的理解是可以类比抖音， 以前看视频， 是我们打开视频网站或者用百度搜索，在视频网站中点开我们想看的视频， 这种模式叫<strong>控制正转</strong>。 这对于我们来说有点麻烦， 主要是懒，有时候并部知道想看啥， 抖音的模式改变了这一现象， 我们想看啥， 是由抖音来决定，  往下滑视频的时候，抖音会自动推送视频，这种莫模式叫<strong>控制反转</strong>。</p>
+<p>控制反转的实现方式主要有两种，依赖查找与依赖注入。它们的本质其实均是将依赖关系的维护与创建独立出来。</p>
+<p>它其实就是将实例化的过程放到了另外一个新的 Factory 方法中， 比如F依赖于D, 需要在构造函数中实例话D类， 那么传统的写法是这样的：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">D</span> &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">F</span> &#123;</span><br><span class="line">    <span class="title function_">construtor</span>(<span class="params"></span>) &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">d</span> = <span class="keyword">new</span> <span class="title function_">D</span>()</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>现在这种依赖关系由Factor来管理, 称之为<strong>依赖查找</strong></p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">Factory</span> &#123;</span><br><span class="line">    <span class="keyword">static</span> <span class="title function_">produce</span>(<span class="params">key: <span class="built_in">string</span></span>) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">F</span> &#123;</span><br><span class="line">    construtor () &#123;</span><br><span class="line">        <span class="variable language_">this</span>.<span class="property">d</span> = <span class="title class_">Factory</span>.<span class="title function_">produce</span>(<span class="string">&#x27;D&#x27;</span>)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<p>Factory 类会按照传入的 key 去查找目标对象，然后再进行实例化与赋值过程。而依赖注入的代码则是这样的：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Provide</span>()</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">F</span> &#123;</span><br><span class="line">  <span class="meta">@Inject</span>()</span><br><span class="line">  <span class="attr">d</span>: D;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到这里我们不需要手动进行赋值，只需要声明这个属性，然后使用装饰器标明它需要被注入一个值即可。</p>
+<p>这里的 Provide 即标明这个类需要被注册到容器中，如果别的地方需要这个类 F 时，其内部的 d 属性需要被注入一个 D 的实例，而 D 的实例又需要 A、C 的实例等等。这一系列的过程是完全交给容器的，我们需要做的就只是用装饰器简单标明下依赖关系即可。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="https://lfei0801.github.io">Alan liu</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://lfei0801.github.io/2023/11/04/decorator/">https://lfei0801.github.io/2023/11/04/decorator/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://lfei0801.github.io" target="_blank">Alanfliu</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/Web%E5%BC%80%E5%8F%91/">Web开发</a><a class="post-meta__tags" href="/tags/NestJS/">NestJS</a></div><div class="post_share"><div class="social-share" data-image="/assets/avator.jpg" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2023/09/17/StrategicMode/" title="浅谈策略模式在前端开发中的用处"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-17</div><div class="title">浅谈策略模式在前端开发中的用处</div></div></a></div><div><a href="/2023/09/23/hooks01/" title="React Hooks Api 的使用"><div class="cover" style="background: var(--default-bg-color)"></div><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2023-09-23</div><div class="title">React Hooks Api 的使用</div></div></a></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="is-center"><div class="avatar-img"><img src= "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-lazy-src="/assets/avator.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/></div><div class="author-info__name">Alan liu</div><div class="author-info__description"></div></div><div class="card-info-data site-data is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">3</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">4</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/LFei0801"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/LFei0801" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a><a class="social-icon" href="/1501236519@qq.com" target="_blank" title="Email"><i class="fas fa-envelope" style="color: #4a7dbe;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E8%A8%80"><span class="toc-number">1.</span> <span class="toc-text">前言</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A3%85%E9%A5%B0%E5%99%A8"><span class="toc-number">2.</span> <span class="toc-text">装饰器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%B1%BB%E8%A3%85%E9%A5%B0%E5%99%A8"><span class="toc-number">2.1.</span> <span class="toc-text">类装饰器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%96%B9%E6%B3%95%E8%A3%85%E9%A5%B0%E5%99%A8"><span class="toc-number">2.2.</span> <span class="toc-text">方法装饰器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B1%9E%E6%80%A7%E8%A3%85%E9%A5%B0%E5%99%A8"><span class="toc-number">2.3.</span> <span class="toc-text">属性装饰器</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E6%8F%8F%E8%BF%B0%E7%AC%A6"><span class="toc-number">2.4.</span> <span class="toc-text">参数描述符</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%A3%85%E9%A5%B0%E5%99%A8%E6%89%A7%E8%A1%8C%E6%9C%BA%E5%88%B6"><span class="toc-number">3.</span> <span class="toc-text">装饰器执行机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%8F%8D%E8%BD%AC%E4%B8%8E%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5"><span class="toc-number">4.</span> <span class="toc-text">控制反转与依赖注入</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/11/04/decorator/" title="装饰器、依赖注入与控制反转">装饰器、依赖注入与控制反转</a><time datetime="2023-11-04T11:32:53.000Z" title="发表于 2023-11-04 19:32:53">2023-11-04</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/09/23/hooks01/" title="React Hooks Api 的使用">React Hooks Api 的使用</a><time datetime="2023-09-23T08:31:53.000Z" title="发表于 2023-09-23 16:31:53">2023-09-23</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/2023/09/17/StrategicMode/" title="浅谈策略模式在前端开发中的用处">浅谈策略模式在前端开发中的用处</a><time datetime="2023-09-17T04:33:14.000Z" title="发表于 2023-09-17 12:33:14">2023-09-17</time></div></div></div></div></div></div></main><footer id="footer" style="background: linear-gradient(20deg, #0062be, #925696, #cc426e, #fb0347)"><div id="footer-wrap"><div class="copyright">&copy;2023 By Alan liu</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主题 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div><div class="footer_custom_text">I wish you to become your own sun, no need to rely on who's light.</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui/dist/fancybox/fancybox.umd.min.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
